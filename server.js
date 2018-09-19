@@ -58,12 +58,12 @@ function getYelp(request, response){
 
     .then(result =>{
       const yelpSummaries = [];
-
-      result.body.forEach( result => {
+      
+      console.log('Yelp result.body: ', result.body.businesses);
+      result.body.businesses.forEach( result => {
         const summary = new Yelp(result);
         yelpSummaries.push(summary);
       });
-      console.log('Yelp result.body: ', result.body.businesses);
       response.send(yelpSummaries);
     });
 }
