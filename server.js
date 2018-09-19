@@ -1,26 +1,21 @@
 'use strict';
 
-const express = require('express');
-const superagent = require('superagent');
-const cors = require('cors');
-const app = express();
-app.use(cors());
-require('dotenv').config();
-const PORT = process.env.PORT || 3000;
+ const express = require('express');
+ const superagent = require('superagent');
+ const cors = require('cors');
+ const app = express();
+ app.use(cors());
+ require('dotenv').config();
+ const PORT = process.env.PORT || 3000;
 
 //API routes
 app.get('/location', (request, response) => {
   searchToLatLong(request.query.data)
-    .then(location => response.send(location));
-});
+    .then(location => response.send(location))
+})
 
 // Dark Skies / weather
 app.get('/weather', getWeather);
-
-// Yelp
-app.get('/yelp', getYelp);
-
-
 
 function searchToLatLong(query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GOOGLE_API_KEY}`;
@@ -31,25 +26,26 @@ function searchToLatLong(query){
         formatted_query: result.body.results[0].formatted_address,
         latitude: result.body.results[0].geometry.location.lat,
         longitude: result.body.results[0].geometry.location.lng
-      };
+      }
 
-    });
-}
+    })
+};
 
 function getWeather(request, response){
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
   return superagent.get(url)
     .then(result =>{
-      const weatherSummaries = [];
-      result.body.daily.data.forEach(day => {
-        const summary = new Weather(day);
-        weatherSummaries.push(summary);
-      });
-      // console.log('weather summaries', weatherSummaries);
-      response.send(weatherSummaries);
-    });
+
+      let weatherSummaries = result.body.daily.data.map(day => {return new Weather(day);});
+
+      response.send(weatherSummaries)
+    })
 }
 
+function Weather(day){
+  this.time = new Date(day.time * 1000).toString().slice(0, 15);
+  this.forecast = day.summary;
+}
 
 function getYelp(request, response){
   const url = `https://api.yelp.com/v3/businesses/search?location=${request.query.data.search_query}`;
@@ -92,6 +88,8 @@ function Yelp(result){
 
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+ app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 
 
