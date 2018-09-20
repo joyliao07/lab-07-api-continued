@@ -17,6 +17,8 @@ app.get('/location', (request, response) => {
 // Dark Skies / weather
 app.get('/weather', getWeather);
 
+app.get('/yelp', getYelp);
+
 function searchToLatLong(query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GOOGLE_API_KEY}`;
   return superagent.get(url)
@@ -47,22 +49,23 @@ function Weather(day){
   this.forecast = day.summary;
 }
 
-// function getYelp(request, response){
-//   const url = `https://api.yelp.com/v3/businesses/search?location=${request.query.data.search_query}`;
+function getYelp(request, response){
+  const url = `https://api.yelp.com/v3/businesses/search?location=${request.query.data.search_query}`;
 
-//   superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+  superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
 
-//     .then(result =>{
-//       const yelpSummaries = [];
+    .then(result =>{
+      let yelpSummaries = result.body.businesses.map(result => {return New Business(result);});
 
-//       result.body.forEach( result => {
-//         const summary = new Yelp(result);
-//         yelpSummaries.push(summary);
-//       });
-//       console.log('Yelp result.body: ', result.body.businesses);
-//       response.send(yelpSummaries);
-//     });
-// }
+      // result.body.forEach( result => {
+      //   const summary = new Yelp(result);
+      //   yelpSummaries.push(summary);
+      // });
+      // console.log('Yelp result.body: ', result.body.businesses);
+
+      // response.send(yelpSummaries);
+    // });
+}
 
 
 // function Yelp(result){
