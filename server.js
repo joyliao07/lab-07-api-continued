@@ -29,7 +29,6 @@ function searchToLatLong(query){
         latitude: result.body.results[0].geometry.location.lat,
         longitude: result.body.results[0].geometry.location.lng
       };
-
     });
 }
 
