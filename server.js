@@ -17,6 +17,7 @@ app.get('/location', (request, response) => {
 
 app.get('/weather', getWeather);
 app.get('/yelp', getYelp);
+app.get('/movies', getMovies);
 
 
 function searchToLatLong(query){
@@ -43,7 +44,6 @@ function getWeather(request, response){
       response.send(weatherSummaries)
     })
 }
-
 function Weather(day){
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
   this.forecast = day.summary;
@@ -60,7 +60,6 @@ function getYelp(request, response){
       response.send(yelpSummaries)
       })
 }
-
 function Business(result){
   this.name = result.name;
   this.image_url = result.image_url;
@@ -68,6 +67,29 @@ function Business(result){
   this.rating = result.rating;
   this.url = result.url;
 }
+
+
+function getMovies(request, response){
+  const url = `https://api.themoviedb.org/3/search/movie/?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&query=${request.query.data.search_query}`;
+  superagent
+    .get(url)
+    .then(result => {
+      let movieSummaries = result.body.results.map(selection => {return new Movie(selection);});
+      response.send(movieSummaries)
+    })
+}
+function Movie(selection){
+  this.title = selection.title;
+  this.released_date = selection.release_date;
+  this.vote_total = selection.vote_count;
+  this.vote_average = selection.vote_average;
+  this.popularity = selection.popularity;
+  this.image_url = selection.poster_path;
+  this.overview = selection.overview;
+}
+
+
+
 
 
 
