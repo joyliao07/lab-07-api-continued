@@ -4,6 +4,7 @@
  const superagent = require('superagent');
  const cors = require('cors');
  const app = express();
+
  app.use(cors());
  require('dotenv').config();
  const PORT = process.env.PORT || 3000;
@@ -14,10 +15,9 @@ app.get('/location', (request, response) => {
     .then(location => response.send(location))
 })
 
-// Dark Skies / weather
 app.get('/weather', getWeather);
-
 app.get('/yelp', getYelp);
+
 
 function searchToLatLong(query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GOOGLE_API_KEY}`;
@@ -33,13 +33,13 @@ function searchToLatLong(query){
     })
 };
 
+
 function getWeather(request, response){
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
-  return superagent.get(url)
+  return superagent
+    .get(url)
     .then(result =>{
-
       let weatherSummaries = result.body.daily.data.map(day => {return new Weather(day);});
-
       response.send(weatherSummaries)
     })
 }
@@ -49,39 +49,25 @@ function Weather(day){
   this.forecast = day.summary;
 }
 
+
 function getYelp(request, response){
   const url = `https://api.yelp.com/v3/businesses/search?location=${request.query.data.search_query}`;
-
-  superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-
+  superagent
+  .get(url)
+  .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
     .then(result =>{
-      let yelpSummaries = result.body.businesses.map(result => {return New Business(result);});
-
-      // result.body.forEach( result => {
-      //   const summary = new Yelp(result);
-      //   yelpSummaries.push(summary);
-      // });
-      // console.log('Yelp result.body: ', result.body.businesses);
-
-      // response.send(yelpSummaries);
-    // });
+      let yelpSummaries = result.body.businesses.map(restaurant => {return new Business(restaurant);});
+      response.send(yelpSummaries)
+      })
 }
 
-
-// function Yelp(result){
-//   this.name = result.body.businesses.name;
-//   this.image_url = result.body.businesses.image_url;
-//   this.price = result.body.businesses.price;
-//   this.rating = result.body.businesses.rating;
-//   this.url = result.body.businesses.url;
-// }
-
-
-
-
-
-
-
+function Business(result){
+  this.name = result.name;
+  this.image_url = result.image_url;
+  this.price = result.price;
+  this.rating = result.rating;
+  this.url = result.url;
+}
 
 
 
